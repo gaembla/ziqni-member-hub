@@ -1,0 +1,39 @@
+name: Build Ziqni
+
+on:
+  push:
+    branches:
+      - blazzio
+
+jobs:
+  build-image:
+    runs-on: [hetzner,heavy]
+    timeout-minutes: 10
+    name: Build and push docker
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Generate build ID
+        id: build_id
+        run: |
+          branch=${GITHUB_REF##*/}
+          sha=${GITHUB_SHA::8}
+          ts=$(date +%s)
+          echo "BUILD_REF=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
+          echo "BUILD_SHA=${sha}" >> $GITHUB_OUTPUT
+          echo "BUILD_TS=${ts}" >> $GITHUB_OUTPUT
+          echo "BUILD_ID=${branch}-${sha}-${ts}" >> $GITHUB_OUTPUT
+
+      - name: AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-north-1
+
+      - name: Build and push
+        run: |
+          aws ecr get-login-password --region eu-north-1 | docker login --username AWS --password-stdin 876380969592.dkr.ecr.eu-north-1.amazonaws.com
+          docker buildx build --no-cache -t 876380969592.dkr.ecr.eu-north-1.amazonaws.com/ziqni-member-hub:${{steps.build_id.outputs.BUILD_ID}} -f Dockerfile .
+          docker push 876380969592.dkr.ecr.eu-north-1.amazonaws.com/ziqni-member-hub:${{steps.build_id.outputs.BUILD_ID}}
