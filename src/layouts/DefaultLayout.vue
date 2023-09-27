@@ -1,10 +1,6 @@
 <template>
   <div class="default-layout" v-if="!isMobile">
-    <div id="nav-block">
-      <TheSidebar @logOut="logOut" />
-    </div>
     <div class="content">
-      <TheHeader />
       <div id="main-block">
         <div v-if="isClientConnected" class="main-block_content">
           <router-view />
@@ -13,28 +9,13 @@
     </div>
   </div>
   <div v-if="isMobile" id="mobile-layout">
-    <div class="mobile-header">
-      <button
-          class="go-back-btn"
-          @click="$router.go(-1)"
-          v-if="isGoBackBtn"
-      >
-        <img src="@/assets/icons/back_arrow.png" alt="">
-      </button>
-      <button v-if="!isGoBackBtn" class="btn">
-        <img src="@/assets/icons/user-info/notification.png" alt="">
-      </button>
-      <span class="page-name">{{ router.currentRoute.value.name }}</span>
-<!--      <ToggleTheme class="btn"/>-->
-      <button class="btn" @click="openProfileInfo"><img src="@/assets/icons/user-info/user.png" alt=""></button>
-    </div>
+
     <div id="mobile-layout-main-block">
       <div v-if="isClientConnected">
         <router-view />
       </div>
     </div>
-    <BlazzioMobileNav />
-    <MobileNav />
+
     <UserProfileMobile
         v-if="isClientConnected"
         @closeProfileInfo="closeProfileInfo"
@@ -51,7 +32,6 @@ import { ApiClientStomp, MemberRequest, MembersApiWs } from '@ziqni-tech/member-
 import { useRouter } from 'vue-router';
 
 import TheSidebar from '../components/sidebar/TheSidebar';
-import TheHeader from '../components/TheHeader';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 import MobileNav from '@/components/sidebar/MobileNav';
@@ -83,7 +63,6 @@ const openProfileInfo = () => {
 const closeProfileInfo = () => {
   isProfileInfo.value = false;
 }
-
 
 onMounted(async () => {
   ApiClientStomp.instance.client.debug = () => {};
@@ -125,7 +104,7 @@ const logOut = async () => {
 
 .default-layout {
   display: grid;
-  grid-template-columns: 15% 85%;
+  grid-template-columns: 0 100%;
   grid-template-areas: "nav main";
   height: 100vh;
 
@@ -142,7 +121,7 @@ const logOut = async () => {
     grid-area: main;
 
     #main-block {
-      padding: 74px 0 0 20px;
+      padding: 0 0 0 20px;
       background-color: $dark-grey;
       overflow: auto;
       height: 100%;

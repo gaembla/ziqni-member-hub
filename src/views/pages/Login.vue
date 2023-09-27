@@ -1,25 +1,5 @@
 <template>
-  <div class="login-page">
-    <div class="login-form">
-      <div class="form-row">
-        <CFormInput
-            label="memberRefId"
-            type="text"
-            v-model="memberRefId"
-        />
-      </div>
-      <div class="form-row">
-        <CFormInput
-            label="apiKey"
-            type="text"
-            v-model="apiKey"
-        />
-      </div>
-      <button class="m-btn login-btn" @click="generateUserToken">
-        Log In
-      </button>
-    </div>
-  </div>
+  <div class="login-page"></div>
 </template>
 
 <script setup>
@@ -28,11 +8,11 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router'
 
 const router = useRouter();
-const memberRefId = ref('Player-1');
+const memberRefId = ref(new URLSearchParams(document.location.search).get('memberRefId'));
 const apiKey = ref('25f99a84a166da4c67abe90a30801c41');
 const expires = 36000;
 
-const generateUserToken = async () => {
+(async () => {
   const memberTokenRequest = {
     member: memberRefId.value,
     apiKey: apiKey.value,
@@ -59,12 +39,12 @@ const generateUserToken = async () => {
   } else {
     console.error('Member Token Error', body.errors[0].message);
   }
-}
+})();
 
 const isLoggedIn = !!localStorage.getItem('token');
 
 if (isLoggedIn) {
-  router.push({ name: 'Dashboard' });
+  router.push({ name: 'Achievements' });
 }
 </script>
 

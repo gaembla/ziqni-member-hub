@@ -21,4 +21,3 @@ createApp({
   .use(store)
   .component('AppLayout', AppLayout)
   .mount('#app');
-
