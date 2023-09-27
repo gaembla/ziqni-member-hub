@@ -9,7 +9,7 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter();
 const memberRefId = ref(new URLSearchParams(document.location.search).get('memberRefId'));
-const apiKey = ref('25f99a84a166da4c67abe90a30801c41');
+const apiKey = ref('caa57595af97ba4a30a99aeac3e4858a');
 const expires = 36000;
 
 (async () => {

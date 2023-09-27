@@ -4,10 +4,8 @@ import AuthGuard from './auth-guard';
 const routes = [
   {
     path: '/',
-    //name: 'Home',
     name: 'Achievements',
     beforeEnter: AuthGuard,
-    //redirect: '/dashboard',
     redirect: '/achievements',
     children: [
       {
