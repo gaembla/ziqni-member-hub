@@ -3,9 +3,9 @@
 </template>
 
 <script setup>
-import { CFormInput } from '@coreui/vue';
-import { ref } from 'vue';
-import { useRouter } from 'vue-router'
+import {ref} from 'vue';
+import {useRouter} from 'vue-router'
+import {jwtDecode} from "jwt-decode";
 
 const router = useRouter();
 const memberRefId = ref(new URLSearchParams(document.location.search).get('memberRefId'));
@@ -41,10 +41,23 @@ const expires = 36000;
   }
 })();
 
-const isLoggedIn = !!localStorage.getItem('token');
+const isLoggedIn = () => {
+  const savedToken = localStorage.getItem('token');
+  if (!savedToken) {
+    return false;
+  }
 
-if (isLoggedIn) {
-  router.push({ name: 'Achievements' });
+  const isValidJwt = jwtDecode(savedToken);
+  const isValid = isValidJwt.exp > Date.now() / 1000;
+  if (!isValid) {
+    console.warn('Saved JWT token expired at ' + isValidJwt.exp + ' (' + new Date(isValidJwt.exp * 1000) + ')')
+    localStorage.removeItem('token');
+  }
+  return isValid;
+};
+
+if (isLoggedIn()) {
+  router.push({name: 'Achievements'});
 }
 </script>
 
