@@ -26,8 +26,8 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue';
-import { useStore } from 'vuex';
+import {computed, onMounted, ref, watch} from 'vue';
+import {useStore} from 'vuex';
 import {
   AchievementRequest,
   AchievementsApiWs,
@@ -40,7 +40,7 @@ import {
 } from '@ziqni-tech/member-api-client';
 import {CNav, CNavLink, CSpinner} from '@coreui/vue';
 
-import { useCountdown } from '@/hooks/useCountdown';
+import {useCountdown} from '@/hooks/useCountdown';
 import AchievementsCard from './AchievementsCard';
 import expiresInIcon from '@/assets/icons/tournament/expires-in.png';
 import Pagination from '@/shared/components/Pagination.vue';
@@ -121,13 +121,14 @@ const getRemainingTimeUntilEndOfMonth = () => {
 };
 
 const updateRemainingTimeUntilEndOfMonth = () => {
-  const { remainingDays, remainingHours, remainingMinutes } = getRemainingTimeUntilEndOfMonth();
+  const {remainingDays, remainingHours, remainingMinutes} = getRemainingTimeUntilEndOfMonth();
   remainingTimeUntilEndOfMonth.value = `${remainingDays}d ${remainingHours}h ${remainingMinutes}m`;
 };
 
 
 onMounted(() => {
   updateRemainingTimeUntilEndOfMonth();
+  console.log('Will attempt to connect to the Member API WS');
   ApiClientStomp.instance.sendSys('', {}, async (json, headers) => {
     if (json && json.entityType === 'Achievement') {
       await getAchievementsRequest();
@@ -142,11 +143,11 @@ watch(activeTabKey, (newValue) => {
 
 watch(dailyCountdownResult, value => {
   if (value) {
-    const { hours, minutes } = dailyCountdownResult;
-    return dailyTimeLeft.value = `${ hours }h ${ minutes }m`;
+    const {hours, minutes} = dailyCountdownResult;
+    return dailyTimeLeft.value = `${hours}h ${minutes}m`;
   }
 
-}, { immediate: true });
+}, {immediate: true});
 
 const remainingTimeUntilEndOfWeek = ref('');
 
@@ -173,7 +174,7 @@ const getRemainingTimeUntilEndOfWeek = () => {
 };
 
 const updateRemainingTimeUntilEndOfWeek = () => {
-  const { remainingDays, remainingHours, remainingMinutes, remainingSeconds } = getRemainingTimeUntilEndOfWeek();
+  const {remainingDays, remainingHours, remainingMinutes, remainingSeconds} = getRemainingTimeUntilEndOfWeek();
   remainingTimeUntilEndOfWeek.value = `${remainingDays}d ${remainingHours}h ${remainingMinutes}m`;
 };
 
@@ -290,7 +291,7 @@ const getEntityRewards = async (ids) => {
   });
 }
 
-const joinAchievement = async ({ id, name }) => {
+const joinAchievement = async ({id, name}) => {
   const optInApiWsClient = new OptInApiWs(ApiClientStomp.instance);
 
   isLoading.value = true;
@@ -309,7 +310,7 @@ const joinAchievement = async ({ id, name }) => {
   });
 };
 
-const leaveAchievement = async ({ id, name }) => {
+const leaveAchievement = async ({id, name}) => {
   const optInApiWsClient = new OptInApiWs(ApiClientStomp.instance);
 
   isLoading.value = true;
@@ -341,6 +342,7 @@ onMounted(() => {
 
 <style lang="scss">
 @import '@/assets/scss/_variables';
+
 .spinner-wrapper
 .until-the-next-day {
   background-color: $light-grey;

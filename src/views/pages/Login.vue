@@ -44,19 +44,21 @@ const expires = 36000;
 const isLoggedIn = () => {
   const savedToken = localStorage.getItem('token');
   if (!savedToken) {
+    console.log('No saved JWT token found');
     return false;
   }
 
   const isValidJwt = jwtDecode(savedToken);
   const isValid = isValidJwt.exp > Date.now() / 1000;
   if (!isValid) {
-    console.warn('Saved JWT token expired at ' + isValidJwt.exp + ' (' + new Date(isValidJwt.exp * 1000) + ')')
+    console.log('Saved JWT token expired at ' + isValidJwt.exp + ' (' + new Date(isValidJwt.exp * 1000) + ')')
     localStorage.removeItem('token');
   }
   return isValid;
 };
 
 if (isLoggedIn()) {
+  console.log('User is logged in, proceed to Achievements')
   router.push({name: 'Achievements'});
 }
 </script>
