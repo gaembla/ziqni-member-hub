@@ -26,8 +26,8 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue';
-import { useStore } from 'vuex';
+import {computed, onMounted, ref, watch} from 'vue';
+import {useStore} from 'vuex';
 import {
   AchievementRequest,
   AchievementsApiWs,
@@ -40,10 +40,11 @@ import {
 } from '@ziqni-tech/member-api-client';
 import {CNav, CNavLink, CSpinner} from '@coreui/vue';
 
-import { useCountdown } from '@/hooks/useCountdown';
+import {useCountdown} from '@/hooks/useCountdown';
 import AchievementsCard from './AchievementsCard';
 import expiresInIcon from '@/assets/icons/tournament/expires-in.png';
 import Pagination from '@/shared/components/Pagination.vue';
+import {jwtDecode} from "jwt-decode";
 
 const store = useStore();
 
@@ -121,18 +122,40 @@ const getRemainingTimeUntilEndOfMonth = () => {
 };
 
 const updateRemainingTimeUntilEndOfMonth = () => {
-  const { remainingDays, remainingHours, remainingMinutes } = getRemainingTimeUntilEndOfMonth();
+  const {remainingDays, remainingHours, remainingMinutes} = getRemainingTimeUntilEndOfMonth();
   remainingTimeUntilEndOfMonth.value = `${remainingDays}d ${remainingHours}h ${remainingMinutes}m`;
 };
 
+const isLoggedIn = () => {
+  const savedToken = localStorage.getItem('token');
+  if (!savedToken) {
+    return false;
+  }
+
+  const isValidJwt = jwtDecode(savedToken);
+  const isValid = isValidJwt.exp > Date.now() / 1000;
+  if (!isValid) {
+    console.warn('Saved JWT token expired at ' + isValidJwt.exp + ' (' + new Date(isValidJwt.exp * 1000) + ')')
+    localStorage.removeItem('token');
+  }
+  return isValid;
+};
 
 onMounted(() => {
   updateRemainingTimeUntilEndOfMonth();
-  ApiClientStomp.instance.sendSys('', {}, async (json, headers) => {
-    if (json && json.entityType === 'Achievement') {
-      await getAchievementsRequest();
-    }
-  })
+
+  if (isLoggedIn()) {
+    console.log('Token is valid, proceed with achievements request')
+    ApiClientStomp.instance.sendSys('', {}, async (json, headers) => {
+      if (json && json.entityType === 'Achievement') {
+        await getAchievementsRequest();
+      }
+    })
+  } else {
+    console.warn("Redirect to login due to expired JWT")
+    localStorage.removeItem('token');
+    router.push({path: '/login'});
+  }
 });
 watch(activeTabKey, (newValue) => {
   if (newValue === 'monthly') {
@@ -142,11 +165,11 @@ watch(activeTabKey, (newValue) => {
 
 watch(dailyCountdownResult, value => {
   if (value) {
-    const { hours, minutes } = dailyCountdownResult;
-    return dailyTimeLeft.value = `${ hours }h ${ minutes }m`;
+    const {hours, minutes} = dailyCountdownResult;
+    return dailyTimeLeft.value = `${hours}h ${minutes}m`;
   }
 
-}, { immediate: true });
+}, {immediate: true});
 
 const remainingTimeUntilEndOfWeek = ref('');
 
@@ -173,7 +196,7 @@ const getRemainingTimeUntilEndOfWeek = () => {
 };
 
 const updateRemainingTimeUntilEndOfWeek = () => {
-  const { remainingDays, remainingHours, remainingMinutes, remainingSeconds } = getRemainingTimeUntilEndOfWeek();
+  const {remainingDays, remainingHours, remainingMinutes, remainingSeconds} = getRemainingTimeUntilEndOfWeek();
   remainingTimeUntilEndOfWeek.value = `${remainingDays}d ${remainingHours}h ${remainingMinutes}m`;
 };
 
@@ -290,7 +313,7 @@ const getEntityRewards = async (ids) => {
   });
 }
 
-const joinAchievement = async ({ id, name }) => {
+const joinAchievement = async ({id, name}) => {
   const optInApiWsClient = new OptInApiWs(ApiClientStomp.instance);
 
   isLoading.value = true;
@@ -309,7 +332,7 @@ const joinAchievement = async ({ id, name }) => {
   });
 };
 
-const leaveAchievement = async ({ id, name }) => {
+const leaveAchievement = async ({id, name}) => {
   const optInApiWsClient = new OptInApiWs(ApiClientStomp.instance);
 
   isLoading.value = true;
@@ -341,6 +364,7 @@ onMounted(() => {
 
 <style lang="scss">
 @import '@/assets/scss/_variables';
+
 .spinner-wrapper
 .until-the-next-day {
   background-color: $light-grey;
