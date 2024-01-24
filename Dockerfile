@@ -11,7 +11,7 @@ COPY package*.json ./
 
 RUN apt-get update && \
     apt-get install -y python3-dev make g++ gcc && \
-    npm install \
+    npm install
 
 # install project dependencies
 RUN npm install
