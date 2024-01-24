@@ -6,13 +6,23 @@
 import {ref} from 'vue';
 import {useRouter} from 'vue-router'
 import {jwtDecode} from "jwt-decode";
+import {useStore} from "vuex";
+import {ApiClientStomp} from "@ziqni-tech/member-api-client";
 
 const router = useRouter();
 const memberRefId = ref(new URLSearchParams(document.location.search).get('memberRefId'));
+
 const apiKey = ref('caa57595af97ba4a30a99aeac3e4858a');
 const expires = 36000;
+const isLoading = ref(false);
+const store = useStore();
 
-(async () => {
+const initialize = async () => {
+  await ApiClientStomp.instance.disconnect();
+  localStorage.removeItem('token');
+
+  isLoading.value = true;
+
   const memberTokenRequest = {
     member: memberRefId.value,
     apiKey: apiKey.value,
@@ -34,12 +44,16 @@ const expires = 36000;
 
   if (body.data && body.data.jwtToken) {
     const token = body.data.jwtToken;
+
+    await ApiClientStomp.instance.connect({token: token});
+    await store.dispatch('setIsConnectedClient', true);
     localStorage.setItem('token', token);
+
     router.go(0)
   } else {
-    console.error('Member Token Error', body.errors[0].message);
+    console.error('Failed to get Member token on Ziqni side', body.errors[0].message);
   }
-})();
+};
 
 const isLoggedIn = () => {
   const savedToken = localStorage.getItem('token');
@@ -60,6 +74,9 @@ const isLoggedIn = () => {
 if (isLoggedIn()) {
   console.log('User is logged in, proceed to Achievements')
   router.push({name: 'Achievements'});
+} else {
+  console.log('User is not logged in, proceed to Login')
+  initialize();
 }
 </script>
 
