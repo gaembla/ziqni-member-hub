@@ -9,6 +9,10 @@ WORKDIR /app
 # copy both 'package.json' and 'package-lock.json' (if available)
 COPY package*.json ./
 
+RUN apt-get update && \
+    apt-get install -y python3-dev make g++ gcc && \
+    npm install \
+
 # install project dependencies
 RUN npm install
 
