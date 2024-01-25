@@ -17,9 +17,11 @@ const expires = 36000;
 const isLoading = ref(false);
 const store = useStore();
 
+const tokenKey = `token-${memberRefId}`;
+
 const initialize = async () => {
   await ApiClientStomp.instance.disconnect();
-  localStorage.removeItem('token');
+  localStorage.removeItem(tokenKey);
 
   isLoading.value = true;
 
@@ -47,7 +49,7 @@ const initialize = async () => {
 
     await ApiClientStomp.instance.connect({token: token});
     await store.dispatch('setIsConnectedClient', true);
-    localStorage.setItem('token', token);
+    localStorage.setItem(tokenKey, token);
 
     router.go(0)
   } else {
@@ -56,7 +58,7 @@ const initialize = async () => {
 };
 
 const isLoggedIn = () => {
-  const savedToken = localStorage.getItem('token');
+  const savedToken = localStorage.getItem(tokenKey);
   if (!savedToken) {
     console.log('No saved JWT token found');
     return false;
@@ -66,7 +68,7 @@ const isLoggedIn = () => {
   const isValid = isValidJwt.exp > Date.now() / 1000;
   if (!isValid) {
     console.log('Saved JWT token expired at ' + isValidJwt.exp + ' (' + new Date(isValidJwt.exp * 1000) + ')')
-    localStorage.removeItem('token');
+    localStorage.removeItem(tokenKey);
   }
   return isValid;
 };
