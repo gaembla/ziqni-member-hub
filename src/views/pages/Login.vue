@@ -3,7 +3,7 @@
     <div class="login-page-loader" v-if="isLoading">
       <img
           class="spinner"
-          src="@/assets/icons/logo-dark.svg"
+          src="@/assets/icons/logo-blazzio.svg"
           alt=""
       >
     </div>
@@ -65,7 +65,7 @@ const initialize = async () => {
 
     setTimeout(() => {
       isLoading.value = false
-    }, 2000)
+    }, 500)
 
     router.go(0)
   } else {
