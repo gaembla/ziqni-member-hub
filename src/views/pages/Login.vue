@@ -1,5 +1,13 @@
 <template>
-  <div class="login-page"></div>
+  <div class="login-page">
+    <div class="login-page-loader" v-if="isLoading">
+      <img
+          class="spinner"
+          src="@/assets/icons/logo-dark.svg"
+          alt=""
+      >
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -21,6 +29,8 @@ const store = useStore();
 const tokenKey = `token-${memberRefId}`;
 
 const initialize = async () => {
+  isLoading.value = true;
+
   await ApiClientStomp.instance.disconnect();
   Cookies.remove(tokenKey);
 
@@ -52,6 +62,10 @@ const initialize = async () => {
     await store.dispatch('setIsConnectedClient', true);
 
     Cookies.set(tokenKey, token, {expires: expiresIn, secure: true, same: 'strict'});
+
+    setTimeout(() => {
+      isLoading.value = false
+    }, 2000)
 
     router.go(0)
   } else {
@@ -97,6 +111,31 @@ if (isLoggedIn()) {
   align-items: center;
   justify-content: center;
   color: $body-text-color;
+
+
+  .login-page-loader {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 5;
+
+    .spinner {
+      width: 47px;
+      height: 45px;
+      opacity: 0.7;
+      animation: rotation 2.5s linear infinite normal;
+
+      @keyframes rotation {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(359deg);
+        }
+      }
+    }
+  }
 
   .login-form {
     position: absolute;
