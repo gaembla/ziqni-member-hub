@@ -8,12 +8,13 @@ import {useRouter} from 'vue-router'
 import {jwtDecode} from "jwt-decode";
 import {useStore} from "vuex";
 import {ApiClientStomp} from "@ziqni-tech/member-api-client";
+import Cookies from 'js-cookie';
 
 const router = useRouter();
 const memberRefId = ref(new URLSearchParams(document.location.search).get('memberRefId'));
 
 const apiKey = ref('caa57595af97ba4a30a99aeac3e4858a');
-const expires = 36000;
+const expiresIn = 36000;
 const isLoading = ref(false);
 const store = useStore();
 
@@ -21,7 +22,7 @@ const tokenKey = `token-${memberRefId}`;
 
 const initialize = async () => {
   await ApiClientStomp.instance.disconnect();
-  localStorage.removeItem(tokenKey);
+  Cookies.remove(tokenKey);
 
   isLoading.value = true;
 
@@ -49,7 +50,8 @@ const initialize = async () => {
 
     await ApiClientStomp.instance.connect({token: token});
     await store.dispatch('setIsConnectedClient', true);
-    localStorage.setItem(tokenKey, token);
+
+    Cookies.set(tokenKey, token, {expires: expiresIn, secure: true, same: 'strict'});
 
     router.go(0)
   } else {
@@ -58,7 +60,8 @@ const initialize = async () => {
 };
 
 const isLoggedIn = () => {
-  const savedToken = localStorage.getItem(tokenKey);
+  const savedToken = Cookies.get(tokenKey);
+
   if (!savedToken) {
     console.log('No saved JWT token found');
     return false;
@@ -68,7 +71,7 @@ const isLoggedIn = () => {
   const isValid = isValidJwt.exp > Date.now() / 1000;
   if (!isValid) {
     console.log('Saved JWT token expired at ' + isValidJwt.exp + ' (' + new Date(isValidJwt.exp * 1000) + ')')
-    localStorage.removeItem(tokenKey);
+    Cookies.remove(tokenKey);
   }
   return isValid;
 };
