@@ -1,5 +1,13 @@
 <template>
-  <div class="login-page"></div>
+  <div class="login-page">
+    <div class="login-page-loader" v-if="isLoading">
+      <img
+          class="spinner"
+          src="@/assets/icons/logo-blazzio.svg"
+          alt=""
+      >
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -8,18 +16,23 @@ import {useRouter} from 'vue-router'
 import {jwtDecode} from "jwt-decode";
 import {useStore} from "vuex";
 import {ApiClientStomp} from "@ziqni-tech/member-api-client";
+import Cookies from 'js-cookie';
 
 const router = useRouter();
 const memberRefId = ref(new URLSearchParams(document.location.search).get('memberRefId'));
 
 const apiKey = ref('caa57595af97ba4a30a99aeac3e4858a');
-const expires = 36000;
+const expiresIn = 36000;
 const isLoading = ref(false);
 const store = useStore();
 
+const tokenKey = `token-${memberRefId}`;
+
 const initialize = async () => {
+  isLoading.value = true;
+
   await ApiClientStomp.instance.disconnect();
-  localStorage.removeItem('token');
+  Cookies.remove(tokenKey);
 
   isLoading.value = true;
 
@@ -47,7 +60,12 @@ const initialize = async () => {
 
     await ApiClientStomp.instance.connect({token: token});
     await store.dispatch('setIsConnectedClient', true);
-    localStorage.setItem('token', token);
+
+    Cookies.set(tokenKey, token, {expires: expiresIn, secure: true, same: 'strict'});
+
+    setTimeout(() => {
+      isLoading.value = false
+    }, 500)
 
     router.go(0)
   } else {
@@ -56,7 +74,8 @@ const initialize = async () => {
 };
 
 const isLoggedIn = () => {
-  const savedToken = localStorage.getItem('token');
+  const savedToken = Cookies.get(tokenKey);
+
   if (!savedToken) {
     console.log('No saved JWT token found');
     return false;
@@ -66,7 +85,7 @@ const isLoggedIn = () => {
   const isValid = isValidJwt.exp > Date.now() / 1000;
   if (!isValid) {
     console.log('Saved JWT token expired at ' + isValidJwt.exp + ' (' + new Date(isValidJwt.exp * 1000) + ')')
-    localStorage.removeItem('token');
+    Cookies.remove(tokenKey);
   }
   return isValid;
 };
@@ -92,6 +111,31 @@ if (isLoggedIn()) {
   align-items: center;
   justify-content: center;
   color: $body-text-color;
+
+
+  .login-page-loader {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 5;
+
+    .spinner {
+      width: 47px;
+      height: 45px;
+      opacity: 0.7;
+      animation: rotation 2.5s linear infinite normal;
+
+      @keyframes rotation {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(359deg);
+        }
+      }
+    }
+  }
 
   .login-form {
     position: absolute;
