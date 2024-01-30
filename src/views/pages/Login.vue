@@ -4,7 +4,7 @@
       <img
           class="spinner"
           src="@/assets/icons/logo-blazzio.svg"
-          alt=""
+          alt="Loading spinner"
       >
     </div>
   </div>
@@ -40,7 +40,7 @@ const initialize = async () => {
     member: memberRefId.value,
     apiKey: apiKey.value,
     isReferenceId: true,
-    expires: expires,
+    expires: expiresIn,
     resource: 'ziqni-gapi'
   };
 
@@ -121,8 +121,8 @@ if (isLoggedIn()) {
     z-index: 5;
 
     .spinner {
-      width: 47px;
-      height: 45px;
+      width: 94px;
+      height: 90px;
       opacity: 0.7;
       animation: rotation 2.5s linear infinite normal;
 
