@@ -7,7 +7,6 @@ export default function (to, from, next) {
 
   const isAuthenticated = getTokenByMemberRefId(storeMemberRefId);
 
-  console.log(`isAuthenticated for memberRefId: ${storeMemberRefId}`, isAuthenticated);
   if (to.name !== 'Login' && !isAuthenticated) next({ name: 'Login' });
   else next();
 }
