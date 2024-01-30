@@ -9,21 +9,22 @@ import {useRouter} from 'vue-router'
 import {jwtDecode} from "jwt-decode";
 import {useStore} from "vuex";
 import {ApiClientStomp} from "@ziqni-tech/member-api-client";
-import Cookies from 'js-cookie';
+import {getTokenByMemberRefId, removeTokenByMemberRefId, storeToken, expiresIn} from "@/utils/authHelper";
 
 const router = useRouter();
 const memberRefId = ref(new URLSearchParams(document.location.search).get('memberRefId'));
 
 const apiKey = ref('caa57595af97ba4a30a99aeac3e4858a');
-const expiresIn = 36000;
 const store = useStore();
 
-const tokenKey = `token-${memberRefId.value}`;
+store.dispatch('setMemberRefIdAction', memberRefId.value);
 
 const initialize = async () => {
 
   await ApiClientStomp.instance.disconnect();
-  Cookies.remove(tokenKey);
+  if (memberRefId.value) {
+    removeTokenByMemberRefId(memberRefId.value);
+  }
 
   const memberTokenRequest = {
     member: memberRefId.value,
@@ -50,16 +51,16 @@ const initialize = async () => {
     await ApiClientStomp.instance.connect({token: token});
     await store.dispatch('setIsConnectedClient', true);
 
-    Cookies.set(tokenKey, token, {expires: expiresIn, secure: true});
+    storeToken(memberRefId.value, token)
 
-    router.go(0)
+    await router.push({name: 'Achievements'});
   } else {
     console.error('Failed to get Member token on Ziqni side', body.errors[0].message);
   }
 };
 
 const isLoggedIn = () => {
-  const savedToken = Cookies.get(tokenKey);
+  const savedToken = getTokenByMemberRefId(memberRefId.value);
 
   if (!savedToken) {
     console.log('No saved JWT token found');
@@ -70,7 +71,8 @@ const isLoggedIn = () => {
   const isValid = isValidJwt.exp > Date.now() / 1000;
   if (!isValid) {
     console.log('Saved JWT token expired at ' + isValidJwt.exp + ' (' + new Date(isValidJwt.exp * 1000) + ')')
-    Cookies.remove(tokenKey);
+    removeTokenByMemberRefId(memberRefId.value);
+
   }
   return isValid;
 };
