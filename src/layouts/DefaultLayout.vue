@@ -39,6 +39,7 @@ import ToggleTheme from '@/shared/components/ToggleTheme';
 import useMobileDevice from '@/hooks/useMobileDevice';
 import UserProfileMobile from '@/components/user-profile/UserProfileMobile.vue';
 import BlazzioMobileNav from "@/components/sidebar/BlazzioMobileNav.vue";
+import {getTokenByMemberRefId} from "@/utils/authHelper";
 
 const router = useRouter();
 const store = useStore();
@@ -66,7 +67,9 @@ const closeProfileInfo = () => {
 
 onMounted(async () => {
   ApiClientStomp.instance.client.debug = () => {};
-  await ApiClientStomp.instance.connect({ token: localStorage.getItem('token') });
+  const memberRefId = store.getters.getMemberRefId;
+  const token = getTokenByMemberRefId(memberRefId);
+  await ApiClientStomp.instance.connect({ token: token });
   await store.dispatch('setIsConnectedClient', true);
 });
 
