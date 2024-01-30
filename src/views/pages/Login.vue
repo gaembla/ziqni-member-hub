@@ -1,12 +1,5 @@
 <template>
   <div class="login-page">
-    <div class="login-page-loader" v-if="isLoading">
-      <img
-          class="spinner"
-          src="@/assets/icons/logo-blazzio.svg"
-          alt="Loading spinner"
-      >
-    </div>
   </div>
 </template>
 
@@ -23,18 +16,14 @@ const memberRefId = ref(new URLSearchParams(document.location.search).get('membe
 
 const apiKey = ref('caa57595af97ba4a30a99aeac3e4858a');
 const expiresIn = 36000;
-const isLoading = ref(false);
 const store = useStore();
 
 const tokenKey = `token-${memberRefId.value}`;
 
 const initialize = async () => {
-  isLoading.value = true;
 
   await ApiClientStomp.instance.disconnect();
   Cookies.remove(tokenKey);
-
-  isLoading.value = true;
 
   const memberTokenRequest = {
     member: memberRefId.value,
@@ -62,10 +51,6 @@ const initialize = async () => {
     await store.dispatch('setIsConnectedClient', true);
 
     Cookies.set(tokenKey, token, {expires: expiresIn, secure: true});
-
-    setTimeout(() => {
-      isLoading.value = false
-    }, 500)
 
     router.go(0)
   } else {
