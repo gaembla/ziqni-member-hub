@@ -22,7 +22,9 @@ store.dispatch('setMemberRefIdAction', memberRefId.value);
 const initialize = async () => {
 
   await ApiClientStomp.instance.disconnect();
-  removeTokenByMemberRefId(memberRefId.value);
+  if (memberRefId.value) {
+    removeTokenByMemberRefId(memberRefId.value);
+  }
 
   const memberTokenRequest = {
     member: memberRefId.value,
