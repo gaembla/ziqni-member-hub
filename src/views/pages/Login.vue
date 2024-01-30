@@ -26,7 +26,7 @@ const expiresIn = 36000;
 const isLoading = ref(false);
 const store = useStore();
 
-const tokenKey = `token-${memberRefId}`;
+const tokenKey = `token-${memberRefId.value}`;
 
 const initialize = async () => {
   isLoading.value = true;
@@ -61,7 +61,7 @@ const initialize = async () => {
     await ApiClientStomp.instance.connect({token: token});
     await store.dispatch('setIsConnectedClient', true);
 
-    Cookies.set(tokenKey, token, {expires: expiresIn, secure: true, same: 'strict'});
+    Cookies.set(tokenKey, token, {expires: expiresIn, secure: true});
 
     setTimeout(() => {
       isLoading.value = false
