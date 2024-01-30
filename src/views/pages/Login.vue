@@ -12,8 +12,7 @@ import {ApiClientStomp} from "@ziqni-tech/member-api-client";
 import {getTokenByMemberRefId, removeTokenByMemberRefId, storeToken, expiresIn} from "@/utils/authHelper";
 
 const router = useRouter();
-// const memberRefId = ref(new URLSearchParams(document.location.search).get('memberRefId'));
-const memberRefId = ref('uiXL9DLw7G');
+const memberRefId = ref(new URLSearchParams(document.location.search).get('memberRefId'));
 
 const apiKey = ref('caa57595af97ba4a30a99aeac3e4858a');
 const store = useStore();
