@@ -25,13 +25,13 @@
     </div>
     <div class="description" v-if="!isInfo">
       <span class="description-title">Description</span>
-      <span class="description-value">
-        {{ achievement.description ? removeHTMLTags(achievement.description) : testDescription }}
+      <span class="description-value" v-html="achievement.description">
       </span>
+
     </div>
     <div class="description" v-if="isInfo">
       <span class="description-title">Terms & Conditions</span>
-      <span class="description-text">{{ removeHTMLTags(achievement.termsAndConditions) }}</span>
+      <span class="description-text" v-html="achievement.termsAndConditions"></span>
     </div>
     <div class="bottom-section">
       <div class="prize-btn">
@@ -44,7 +44,7 @@
           @click="handleButtonClick"
           :class="{ 'join-button': !isEntrant, 'leave-button': isEntrant }"
       >
-        <span >{{ isEntrant ? 'Leave' : 'Join' }}</span>
+        <span>{{ isEntrant ? 'Leave' : 'Join' }}</span>
       </button>
       <button
           v-else
@@ -69,11 +69,10 @@
 <script setup>
 
 import defaultIcon from '@/assets/icons/achievements/book.svg';
-import { computed, ref, toRef, watch } from 'vue';
+import {computed, ref, toRef, watch} from 'vue';
 import Modal from '@/shared/components/Modal.vue';
 import diamondIcon from '@/assets/icons/achievements/diamond.png';
-import { removeHTMLTags } from '@/utils/removeHTMLTags';
-import { CSpinner } from "@coreui/vue";
+import {CSpinner} from "@coreui/vue";
 
 const props = defineProps({
   achievement: Object
@@ -100,7 +99,7 @@ const isEntrant = computed(() => {
 
 watch(achievement, (newVal) => {
   isLoading.value = false;
-}, { immediate: true });
+}, {immediate: true});
 
 const rewardIcon = computed(() => {
   return props.achievement && props.achievement.rewardIconLink
@@ -345,6 +344,7 @@ const goToInfo = () => {
     }
   }
 }
+
 @media screen and (max-width: 500px) {
   .achievements-details-card {
     max-width: 840px;
